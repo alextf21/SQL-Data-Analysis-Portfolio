@@ -6,3 +6,4 @@ A collection of SQL data analysis projects demonstrating exploration, aggregatio
 - Social Media Addiction & Relationships in Students - Real world dataset, Kaggle link <a href = "https://www.kaggle.com/datasets/adilshamim8/social-media-addiction-vs-relationships" target = "_blank">here</a>.
 - Various US Medical Costs from 2010-2020 - Real world dataset, Kaggle link <a href = "https://www.kaggle.com/datasets/waqi786/medical-costs" target = "_blank">here</a>.
 - Sleep Health and Lifestyle - Synthetic dataset, Kaggle link <a href = "https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset" target = "_blank">here</a>.
+- Human Decision Fatigue - Synthetic dataset that can be found on Kaggle <a href = "https://www.kaggle.com/datasets/sonalshinde123/human-decision-fatigue-behavioral-dataset" target = "_blank">here</a>. 

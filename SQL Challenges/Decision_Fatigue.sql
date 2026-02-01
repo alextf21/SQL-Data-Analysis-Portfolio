@@ -141,3 +141,19 @@ ROUND(AVG(Decision_Fatigue_Score),2) AS AvgDecisionFatigueScore
 FROM fatigue
 GROUP BY HoursAwakeCategory
 ORDER BY AvgDecisionFatigueScore DESC
+
+-- For each System_Recommendation, calculate what percentage of total rows it represents.
+SELECT 
+(COUNT(System_Recommendation) FILTER (System_Recommendation = 'Slow Down') / 
+COUNT(*)) * 100 AS PctSlowDown,
+(COUNT(System_Recommendation) FILTER (System_Recommendation = 'Take Break') / 
+COUNT(*)) * 100 AS PctTakeBreak,
+(COUNT(System_Recommendation) FILTER (System_Recommendation = 'Continue') / 
+COUNT(*)) * 100 AS PctContinue
+FROM fatigue
+
+-- Show difference between each row’s fatigue score and the overall average fatigue score.
+SELECT *,
+ROUND(Decision_Fatigue_Score - AVG(Decision_Fatigue_Score) OVER(), 2) AS FatigueScoreDiffFromAvg
+FROM fatigue
+LIMIT 25

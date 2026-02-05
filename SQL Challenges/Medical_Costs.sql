@@ -108,3 +108,74 @@ SELECT
   FROM insurance
   GROUP BY ALL 
   ORDER BY Avg_Charges DESC
+
+/* Level 3 — Advanced (Business Analytics & SQL Reasoning) */
+
+-- Window Functions
+-- For each policyholder, compute how their charges compare to the average charges within their region.
+SELECT *, 
+charges - AVG(charges) OVER() as "Charges difference from average"
+FROM insurance
+ORDER BY region, "Charges difference from average"
+
+-- Rank policyholders by charges within each region.
+SELECT *, 
+RANK() OVER(PARTITION BY region ORDER BY charges DESC) as Regional_Rank
+FROM insurance
+
+-- Percentage of total charges attributed to high-risk policyholders
+SELECT ROUND(SUM(charges),2) as Total_Charges,
+((SELECT SUM(charges) FROM insurance WHERE smoker = true AND bmi >= 28.00 AND age >= 45)
+  / Total_Charges) * 100
+as '% of Total, High Risk'
+FROM insurance
+
+-- Create a numeric risk score per policyholder based on:
+-- +2 points if smoker
+-- +1 point if BMI ≥ 30
+-- +1 point if age ≥ 45
+-- +1 point if children ≥ 2
+WITH RiskScore AS (
+SELECT
+age, sex, bmi, children, smoker, region, charges,
+  CASE
+    WHEN smoker = true THEN 2
+    ELSE 0
+  END AS Smoker_Points,
+  CASE
+    WHEN bmi >= 30 THEN 1
+    ELSE 0
+  END AS Bmi_Points,
+  CASE 
+    WHEN age >= 45 THEN 1
+    ELSE 0
+  END AS Age_Points,
+  CASE 
+    WHEN children >= 2 THEN 1
+    ELSE 0
+  END AS Children_Points,
+Smoker_Points + Bmi_Points + Age_Points + Children_Points AS RiskPoints
+FROM insurance
+)
+SELECT age, sex, bmi, children, smoker, region, charges, RiskPoints
+FROM RiskScore
+ORDER BY RiskPoints DESC
+
+-- Executive Summary Query
+-- Produce a single query output that includes:
+-- Total policyholders
+-- Average charges
+-- Percentage of smokers
+-- Average smoker vs. non-smoker charges
+-- Region with the highest average charges
+SELECT 
+COUNT(*) as 'Total Policyholders',
+ROUND(AVG(charges), 2) as 'Average Charges',
+COUNT(*) FILTER (WHERE smoker = true) as 'Number of Smokers',
+ROUND(AVG(charges) FILTER (WHERE smoker = true), 2) as 'Average Smoker Charge',
+(SELECT region 
+  FROM insurance 
+  GROUP BY region, charges 
+  ORDER BY charges DESC 
+  LIMIT 1) as 'Region with Highest Average Charges'
+FROM insurance

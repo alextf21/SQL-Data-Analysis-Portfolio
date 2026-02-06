@@ -94,3 +94,24 @@ SELECT student_id, grade_level, final_score,
 RANK() OVER(PARTITION BY grade_level ORDER BY final_score DESC) AS grade_level_rank
 FROM impact
 ORDER BY grade_level_rank ASC
+
+-- Executive summary report
+-- Produce a single query that shows the following: 
+-- Total individuals
+-- Average final score
+-- Average AI dependency score
+-- Percentage passed
+-- AI usage purpose with lowest average score
+-- Average Study hours per day of those who passed
+SELECT 
+ROUND(AVG(final_score), 2) AS avg_Final_Score,
+ROUND(AVG(ai_dependency_score), 2) AS avg_ai_dependency_score,
+ROUND((COUNTIF(final_score > 50) / COUNT(*)) * 100, 2) AS pct_passed,
+(SELECT ai_usage_purpose
+  FROM impact
+  GROUP BY ai_usage_purpose, final_score
+  ORDER BY final_score DESC
+  LIMIT 1) AS 'AI usage purpose with lowest average score',
+ROUND(AVG(study_hours_per_day) FILTER (WHERE passed = 1), 2) AS 
+  'Average Study hours per day of those who passed'
+FROM impact

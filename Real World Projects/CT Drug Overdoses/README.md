@@ -6,7 +6,28 @@ report, location info such as county and also the manner of death. For more info
 
  ## Key Findings
  - **Long-Term Trend**: Drug related deaths show a clear upward trajectory over time with rolling averages confirming sustained growth rather than isolated spikes.
- - **Substance Trends**: Fentanyl has become inscreasingly prevalent over time and now represents a significant share of total overdose deaths. Its dominance suggests not only a
-shift in the drug supply but also its role in the modern overdose crisis.
+ - **Substance Trends**: Fentanyl has become inscreasingly prevalent over time and now represents a significant share of total overdose deaths. Its dominance suggests not only a shift in the drug supply but also its role in the modern overdose crisis.
 - **Demographic Patterns**: A majority of deaths are concentrated among the 35-44 age group, represening the most at-risk range. Male deaths consistently exceed female deaths,
 indicating a gender disparity. 
+
+</br>
+
+## Annual Connecticut Drug Overdose Trends (2012-2024)
+This table aggregates yearly overdose deaths in CT and tracks a few key indicators including total fatalities, fentanyl involvement
+rate and average victim age. As you can see, there is a sharp increase in deaths between 2012 and 2021, coinciding with fentanyl's rapid emergence as the dominant substance present in overdose cases. 
+
+| Year | Total Deaths | Fentanyl Presence (%) | Average Age
+| --- | --- | --- | --- |
+| 2012 | 355 | 3.66 | 40.8
+| 2013 | 490 | 7.35 | 41.4
+| 2014 | 558 | 13.44 | 41.6
+| 2015 | 729 | 25.93 | 42.3
+| 2016 | 917 | 52.56 | 42.1
+| 2017 | 1038 | 65.13 | 41.7
+| 2018 | 1017 | 74.73 | 42.8
+| 2019 | 1200 | 81.58 | 43.3
+| 2020 | 1374 | 84.35 | 43.7
+| 2021 | 1524 | 85.37 | 45.8
+| 2022 | 1424 | 86.29 | 46.6
+| 2023 | 1327 | 84.70 | 48
+| 2024 | 982 | 77.60 | 48.5

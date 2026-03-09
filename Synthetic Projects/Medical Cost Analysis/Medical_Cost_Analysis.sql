@@ -2,81 +2,94 @@
 
 -- Basic Exploration
 -- Return all records for policyholders who are smokers.
-SELECT * FROM insurance 
+SELECT * 
+FROM insurance 
 WHERE smoker = 'false'
 
 -- List distinct regions represented in the dataset.
-SELECT DISTINCT(region) FROM insurance
+SELECT 
+  DISTINCT(region) 
+FROM insurance
 
 -- Simple Aggregations
 -- Compute the average, minimum, and maximum insurance charges 
 -- across all policyholders.
 SELECT 
-AVG(charges) as Avg_Charges,
-MIN(charges) as Min_Charges,
-MAX(charges) as Max_Charges,
+  AVG(charges) as Avg_Charges,
+  MIN(charges) as Min_Charges,
+  MAX(charges) as Max_Charges,
 FROM insurance
 
 -- Calculate the average charges for smokers vs. non-smokers.
-SELECT smoker, 
-ROUND(AVG(charges), 2) as Avg_Charges
+SELECT 
+  smoker, 
+  ROUND(AVG(charges), 2) as Avg_Charges
 FROM insurance
 GROUP BY ALL
 
 -- Grouped Analysis
 -- Find the average insurance charges by region.
-SELECT region,
-ROUND(AVG(charges), 2) as Avg_Charges
+SELECT 
+  region,
+  ROUND(AVG(charges), 2) as Avg_Charges
 FROM insurance
 GROUP BY ALL 
 ORDER BY Avg_Charges DESC
 
 -- Determine the average BMI by gender.
-SELECT sex,
-ROUND(AVG(bmi), 2) as Avg_Bmi
+SELECT 
+  sex,
+  ROUND(AVG(bmi), 2) as Avg_Bmi
 FROM insurance
 GROUP BY ALL
 
 -- Filtering with Conditions
 -- Identify policyholders over age 50 with more than 2 children.
-SELECT * FROM insurance
+SELECT * 
+FROM insurance
 WHERE age > 50 AND children > 2 
 
 -- Return all policyholders whose BMI is above the dataset average.
-SELECT * FROM insurance
+SELECT * 
+FROM insurance
 WHERE bmi > (SELECT AVG(bmi) FROM insurance)
 
 /* Level 2 — Intermediate (Analytical Grouping & Derived Metrics) */
 
 -- Ranking & Ordering
 -- Rank regions by average insurance charges (highest to lowest).
-SELECT region,
-ROUND(AVG(charges), 2) AS Avg_Charges
+SELECT 
+  region,
+  ROUND(AVG(charges), 2) AS Avg_Charges
 FROM insurance
 GROUP BY region
 ORDER BY Avg_Charges DESC 
 
 -- Identify the top 10 most expensive individual policies.
-SELECT * FROM insurance
+SELECT * 
+FROM insurance
 ORDER BY charges DESC
 LIMIT 10
 
 -- Ranking & Ordering
 -- Rank regions by average insurance charges (highest to lowest).
-SELECT region,
-ROUND(AVG(charges), 2) AS Avg_Charges
+SELECT 
+  region,
+  ROUND(AVG(charges), 2) AS Avg_Charges
 FROM insurance
 GROUP BY region
 ORDER BY Avg_Charges DESC 
 
 -- Identify the top 10 most expensive individual policies.
-SELECT * FROM insurance
+SELECT * 
+FROM insurance
 ORDER BY charges DESC
 LIMIT 10
 
 -- Categorization with CASE
 -- Create age groups (e.g., <30, 30–39, 40–49, 50-59, 60+) and compute average charges per age group.
 SELECT 
+  
   CASE 
     WHEN age < 20 THEN '<20'
     WHEN age >= 20 AND age < 30 THEN '20-29'
@@ -85,11 +98,12 @@ SELECT
     WHEN age >= 50 AND age < 60 THEN '50-59'
     WHEN age >= 60 THEN '60+'
     ELSE 'Unkown'
-  END AS 'Age',
+    END AS 'Age',
+  
   ROUND(AVG(charges), 2) AS Avg_Charges
-  FROM insurance
-  GROUP BY ALL
-  ORDER BY Avg_Charges DESC
+FROM insurance
+GROUP BY ALL
+ORDER BY Avg_Charges DESC
 
 -- Categorize BMI into Underweight, Normal, Overweight, and Obese, then calculate average charges/category
 -- Underweight: Below 18.5
@@ -97,69 +111,50 @@ SELECT
 -- Overweight: 25.0 – 29.9
 -- Obese: 30.0 or greater
 SELECT 
+  
   CASE 
     WHEN bmi < 18.5 THEN 'Underweight'
     WHEN bmi >= 18.5 AND bmi < 24.999 THEN 'Healthy Weight'
     WHEN bmi >= 25 AND bmi < 29.999 THEN 'Overweight'
     WHEN bmi >= 30 THEN 'Obese'
     ELSE 'Unknown'
-  END AS Bmi_Category, 
+    END AS Bmi_Category, 
+  
   ROUND(AVG(charges), 2) AS Avg_Charges
-  FROM insurance
-  GROUP BY ALL 
-  ORDER BY Avg_Charges DESC
+FROM insurance
+GROUP BY ALL 
+ORDER BY Avg_Charges DESC
 
 /* Level 3 — Advanced (Business Analytics & SQL Reasoning) */
 
 -- Window Functions
 -- For each policyholder, compute how their charges compare to the average charges within their region.
 SELECT *, 
-charges - AVG(charges) OVER() as "Charges difference from average"
+  charges - AVG(charges) OVER() as charges_deviation_avg
 FROM insurance
-ORDER BY region, "Charges difference from average"
+ORDER BY region, charges_deviation_avg
 
 -- Rank policyholders by charges within each region.
 SELECT *, 
-RANK() OVER(PARTITION BY region ORDER BY charges DESC) as Regional_Rank
+  RANK() OVER( 
+    PARTITION BY region 
+    ORDER BY charges DESC
+    ) as Regional_Rank
 FROM insurance
 
 -- Percentage of total charges attributed to high-risk policyholders
-SELECT ROUND(SUM(charges),2) as Total_Charges,
-((SELECT SUM(charges) FROM insurance WHERE smoker = true AND bmi >= 28.00 AND age >= 45)
-  / Total_Charges) * 100
-as '% of Total, High Risk'
+SELECT  
+  ROUND(SUM(charges), 2) as Total_Charges,
+  
+  ((SELECT 
+      SUM(charges) 
+    FROM insurance 
+    WHERE smoker = true AND bmi >= 28.00 AND age >= 45) / 
+    Total_Charges) * 100
+    as '% of Total, High Risk'
+  
 FROM insurance
 
--- Create a numeric risk score per policyholder based on:
--- +2 points if smoker
--- +1 point if BMI ≥ 30
--- +1 point if age ≥ 45
--- +1 point if children ≥ 2
-WITH RiskScore AS (
-SELECT
-age, sex, bmi, children, smoker, region, charges,
-  CASE
-    WHEN smoker = true THEN 2
-    ELSE 0
-  END AS Smoker_Points,
-  CASE
-    WHEN bmi >= 30 THEN 1
-    ELSE 0
-  END AS Bmi_Points,
-  CASE 
-    WHEN age >= 45 THEN 1
-    ELSE 0
-  END AS Age_Points,
-  CASE 
-    WHEN children >= 2 THEN 1
-    ELSE 0
-  END AS Children_Points,
-Smoker_Points + Bmi_Points + Age_Points + Children_Points AS RiskPoints
-FROM insurance
-)
-SELECT age, sex, bmi, children, smoker, region, charges, RiskPoints
-FROM RiskScore
-ORDER BY RiskPoints DESC
 
 -- Executive Summary Query
 -- Produce a single query output that includes:
@@ -169,13 +164,20 @@ ORDER BY RiskPoints DESC
 -- Average smoker vs. non-smoker charges
 -- Region with the highest average charges
 SELECT 
-COUNT(*) as 'Total Policyholders',
-ROUND(AVG(charges), 2) as 'Average Charges',
-COUNT(*) FILTER (WHERE smoker = true) as 'Number of Smokers',
-ROUND(AVG(charges) FILTER (WHERE smoker = true), 2) as 'Average Smoker Charge',
-(SELECT region 
+  COUNT(*) as 'Total Policyholders',
+  ROUND(AVG(charges), 2) as 'Average Charges',
+  
+  COUNT(*) FILTER (WHERE smoker = true) as 'Number of Smokers',
+  
+  ROUND( 
+    AVG(charges) FILTER (WHERE smoker = true), 
+    2) as 'Average Smoker Charge',
+  
+  (SELECT 
+    region 
   FROM insurance 
   GROUP BY region, charges 
   ORDER BY charges DESC 
   LIMIT 1) as 'Region with Highest Average Charges'
+  
 FROM insurance

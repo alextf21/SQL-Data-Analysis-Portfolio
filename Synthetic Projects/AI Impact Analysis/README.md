@@ -1,5 +1,5 @@
 # Advanced Analysis: Script Explanations
-Visit this link to see the full explanations on the more complex queries.
+Visit [this link](https://github.com/alextf21/SQL-Data-Analysis-Portfolio/blob/main/Synthetic%20Projects/AI%20Impact%20Analysis/Advanced_AI_Impact_Analysis_Explanation.md) to see the full explanations on more complex queries.
 
 </br>
 
@@ -13,7 +13,7 @@ with high vs. low AI dependency.
 - **Executive Summary Report**: The final query in this script serves as a 'one-stop-shop' for stakeholders. It aggregates multiple metrics into a single row so
 can see the global average, the pass percentage, the AI usage purpose associated with the highest average scores and metrics for those who passed. 
 
-Other Strategies
+Other Strategies:
 - **What if Scenario**: Assume a passing score and determine the average final score, percentage passed for each performance category. Also
 uses ```COUNTIF``` function.
 - **Data Bucketization**: Using a ```CASE``` statement, I grouped students into brackets (4-5 hours, 5-6 etc.) to determine which sleep duration correlated with

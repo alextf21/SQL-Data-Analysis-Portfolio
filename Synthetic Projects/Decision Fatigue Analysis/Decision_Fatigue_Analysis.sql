@@ -165,10 +165,34 @@ SELECT
   ROUND(
     (COUNT(*) FILTER (WHERE Fatigue_Level = 'High') / 
       COUNT(*)) * 100, 2)  AS PctHighFatigue,
-  
+
+  -- The last column indicates a functional dependency between fatige level and system recommendation 
   ROUND(
     (COUNT(*) FILTER (WHERE System_Recommendation = 'Take Break') / 
       COUNT(*)) * 100, 2) AS PctTakeBreakRecommendation
 FROM fatigue
 GROUP BY Time_of_Day
--- The last column indicates a functional dependency between fatige level and system recommendation 
+  
+-- Build a CTE that classifies users into Risk Segments:
+-- High Risk: Fatigue_Level='High' AND Error_Rate > 0.10
+-- Medium Risk: Fatigue_Level='Moderate'
+-- Low Risk: Fatigue_Level='Low'
+-- Then compute average cognitive load per segment.
+WITH RiskSegment AS (
+  SELECT 
+    CASE 
+      WHEN Fatigue_Level = 'High' AND Error_Rate > 0.10 THEN 'High Risk'
+      WHEN Fatigue_Level = 'High' THEN 'High Risk'
+      WHEN Fatigue_Level = 'Moderate' THEN 'Medium Risk'
+      WHEN Fatigue_Level = 'Low' THEN 'Low Risk'
+      ELSE 'Unknown'
+    END AS Segments,
+    Cognitive_Load_Score
+  FROM fatigue
+)
+
+SELECT 
+  Segments,
+  ROUND(AVG(Cognitive_Load_Score), 4) AS AvgCogLoadScore
+FROM RiskSegment
+GROUP BY Segments

@@ -3,6 +3,20 @@ Visit [this link](https://github.com/alextf21/SQL-Data-Analysis-Portfolio/blob/m
 
 </br>
 
+# Dataset Overview
+This dataset explores how different AI tools (ChatGPT, Gemini, Claude) influence student performance and learning efficiency. It covers 6 different grade levels: High school 
+(10th-12th) to university level (1st-3rd) year. It contains components from several categories including AI usage purpose, lifestyle, and academic performance. More info can be found on the [Kaggle link](https://www.kaggle.com/datasets/aminasalamt/students-ai-usage-and-academic-performance). 
+
+## Column Reference
+| Category        | Columns           |
+| ------------- |:-------------:|
+| **Identity/Demographics**      | ```student_id```, ```age```, ```gender```, ```grade_level``` |
+| **AI Integration**      | ```uses_ai```, ```ai_usage_time_minutes```, ```ai_tools_used```, ```ai_usage_purpose```, ```ai_dependency_score```, ```ai_generated_content_percentage```, ```ai_prompts_per_week```, ```ai_ethics_score```      |
+| **Academic Performance** |   ```last_exam_score```, ```assignment_scores_avg```, ```attendance_percentage```, ```concept_understanding_score```, ```final_score```, ```passed```, ```performance_category```    |
+| **Behavioral Habits** |   ```study_hours_per_day```, ```study_consistency_index```, ```improvement_rate```, ```sleep_hours```, ```social_media_hours```, ```tutoring_hours```, ```class_participation_score```    |
+
+</br>
+
 # AI Impact Analysis: Basic and Intermediate SQL
 
 Key Techniques Used:

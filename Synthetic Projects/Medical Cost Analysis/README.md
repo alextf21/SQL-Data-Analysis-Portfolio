@@ -5,14 +5,16 @@ in the general analysis file explained below.
 </br>
 
 # Data Overview
-With 7 columns and 1338 rows this dataset provides demographic, physical, and financial insights for policyholders of a fictitious setting. Info on the columns:
-- age: An integer between 18-64
-- sex: Male or female
-- bmi: Double ranging from about 17-46
-- children: Number of dependents
-- smoker: True or false
-- region: 4 options, northeast, northwest, southeast, southwest
-- charges: An average of about $13,200.
+With 7 columns and 1338 rows, this dataset contains cotains information regarding individual medical insurance costs and the factors that influence them.
+More info can be found in the following [Kaggle link](https://www.kaggle.com/datasets/mosapabdelghany/medical-insurance-cost-dataset).
+
+## Column Reference
+| Category | Columns|
+| :-------------: |:-------------:|
+| **Demographic & Geographic**      | ```age```, ```sex```, ```region```   |
+| **Health & Lifestyle**      | ```bmi```, ```smoker```  |
+| **Family** | ```children```   |
+| **Financial** | ```charges``` |
 
 </br>
 

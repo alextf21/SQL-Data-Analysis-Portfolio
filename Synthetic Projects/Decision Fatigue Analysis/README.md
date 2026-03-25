@@ -4,11 +4,19 @@ for a breakdown of the complex queries.
 
 </br>
 
-# Overview
+# Dataset Overview
 This project analyzes a dataset of 25,000 records tracking coginitive load, sleep, and performance metrics. The main goal is to investigate how variables such
 as sleep, hours awake, and time of day influence decision making accuracy, error rates, and cognitive load. Think of each record as a representation of a 
-simulated decision being made.
-The analysis progresses from foundational, descriptive statistics to intermediate queries including risk segmentation and performance benchmarking.
+simulated decision being made. For more info, visit the [Kaggle link](https://www.kaggle.com/datasets/sonalshinde123/human-decision-fatigue-behavioral-dataset). 
+
+## Column Reference
+| Category | Columns|
+| ------------- |:-------------:|
+| **Temporal & Lifestyle**      | ```Hours_Awake```, ```Sleep_Hours_Last_Night```, ```Time_of_Day```   |
+| **Activity Metrics**      | ```Decisions_Made```, ```Task_Switches```, ```Avg_Decision_Time_sec```   |
+| **Physiological Factors/State** | ```caffeine_Intake_Cups```, ```Stress_Level_1_10```, ```Cognitive_Load_Score```   |
+| **Performance Outcomes** | ```Error_Rate``` |
+| **Fatigue Analysis** | ```Decision_Fatigue_Score```, ```Fatigue_Level```, ```System_Recommendation```   |
 
 </br>
 
@@ -27,5 +35,5 @@ The analysis progresses from foundational, descriptive statistics to intermediat
 
 ## Key Insights Explored
 - Temporal Patterns: Analyzing how decision fluctuates across different times of day.
-- Operational Risk: Identifying 'High Risk' segments where high fatigue coincides with an error rate > 10%/
+- Operational Risk: Identifying 'High Risk' segments where high fatigue coincides with an error rate > 10%.
 - Final analytical view that could be used by a dashboard that has aggregated data for Time_of_Day. 

@@ -1,6 +1,19 @@
 ## Brief Overview
 Data can be found in the relative folder but just for context, these are drug related deaths from 2012-2024. With about 13k rows and 48 columns, this contains the toxicity 
-report, location info such as county and also the manner of death. For more information and to view the full change catalog, visit the website data.ct.gov website here. 
+report, location info such as county and also the manner of death. For more information and to view the full change catalog, visit the website associated data.ct.gov website [here](https://data.ct.gov/Health-and-Human-Services/Accidental-Drug-Related-Deaths-2012-2024/rybz-nyjw/about_data). 
+
+</br>
+
+## Column Reference
+| Category        | Columns           |
+| ------------- |:-------------|
+| **Case Identification**      | ```Date```, ```Date Type```, ```Manner of Death```, ```Cause of Death```, ```Other Significant Conditions```|
+| **Demographics**      | ```Age```, ```Sex```, ```Race```, ```Ethnicity``` |
+| **Residence Location** | ```Residence City```,  ```Residence County```, ```Residence State```, ```ResidenceCityGeo``` |
+| **Injury Location** | ```Injury City```,  ```Injury County```, ```Injury State```, ```Injury Place```, ```Description of Injury```, ```InjuryCityGeo```|
+| **Death Location** | ```Death City```, ```Death County```, ```Death State```, ```Location```, ```Location if Other```, ```DeathCityGeo``` |
+| **Toxicology (Opioids)** | ```Heroin```, ```Heroin death certificate (DC)```, ```Heroin/Morph/Codeine```, ```Fentanyl```, ```Fentanyl Analogue```, ```Any Opioid```, ```Other Opioid```, ```Oxycodone```, ```Hydrocodone```, ```Hydromorphone```, ```Methadone```, ```Morphine (Not Heroin)```, ```Tramad```, ```Opiate NOS``` |
+| **Toxicology (Other)** | ```Cocaine```, ```Ethanol```, ```Benzodiazepine```, ```Meth/Amphetamine```, ```Amphet```, ```Xylazine```, ```Gabapentin```, ```Other``` |
 
  </br>
 

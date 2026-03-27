@@ -8,12 +8,32 @@ This dataset explores how different AI tools (ChatGPT, Gemini, Claude) influence
 (10th-12th) to university level (1st-3rd) year. It contains components from several categories including AI usage purpose, lifestyle, and academic performance. More info can be found on the [Kaggle link](https://www.kaggle.com/datasets/aminasalamt/students-ai-usage-and-academic-performance). 
 
 ## Column Reference
-| Category        | Columns           |
-| ------------- |:-------------:|
+| Category | Columns |
+| :------------- |:-------------|
 | **Identity/Demographics**      | ```student_id```, ```age```, ```gender```, ```grade_level``` |
 | **AI Integration**      | ```uses_ai```, ```ai_usage_time_minutes```, ```ai_tools_used```, ```ai_usage_purpose```, ```ai_dependency_score```, ```ai_generated_content_percentage```, ```ai_prompts_per_week```, ```ai_ethics_score```      |
 | **Academic Performance** |   ```last_exam_score```, ```assignment_scores_avg```, ```attendance_percentage```, ```concept_understanding_score```, ```final_score```, ```passed```, ```performance_category```    |
 | **Behavioral Habits** |   ```study_hours_per_day```, ```study_consistency_index```, ```improvement_rate```, ```sleep_hours```, ```social_media_hours```, ```tutoring_hours```, ```class_participation_score```    |
+
+</br>
+
+## Key Findings
+- **Executive Summary Report**: This produces a single row that shows the count of individuals in the dataset, the average final score, the average AI dependency score, the percentage of those who passed (assuming a 55 score however this can be altered), the AI usage purpose that has the lowest average score, and the average study hours of those who passed.
+
+| Total Students | Average Final Score | Average AI Dependency Score | Passed (%) | AI Usage Purpose with Lowest Average Score | Average Study Hours per Day of those who Passed |
+| :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:| 
+| 8000 | 56.81 | 5.52 | 54.96 | Coding | 3.29 |
+
+</br>
+
+- **What-If Scenario**: This query assumes a passing score and aggregates the performance category column to determine the average final score of each category, the count of those who passed, and the pass/fail rate.
+
+| Performance Category | Average Final Score | Students Passed | Passed (%) | 
+| :-------------: |:-------------:|:-------------:|:-------------:|
+| Low | 41.54 | 0 | 0 |
+| Medium | 61.24 | 3644 | 77.45 |
+| High | 80.70 | 753 | 100 |
+
 
 </br>
 
@@ -24,12 +44,4 @@ Key Techniques Used:
 the global average.
 - ```FILTER (WHERE ...)``` : A cleaner alternative to ```CASE``` statements for conditional aggregation. This was used to compare the average scores of students 
 with high vs. low AI dependency.
-- **Executive Summary Report**: The final query in this script serves as a 'one-stop-shop' for stakeholders. It aggregates multiple metrics into a single row so
-can see the global average, the pass percentage, the AI usage purpose associated with the highest average scores and metrics for those who passed. 
-
-Other Strategies:
-- **What if Scenario**: Assume a passing score and determine the average final score, percentage passed for each performance category. Also
-uses ```COUNTIF``` function.
-- **Data Bucketization**: Using a ```CASE``` statement, I grouped students into brackets (4-5 hours, 5-6 etc.) to determine which sleep duration correlated with
-the highest average score. 
 

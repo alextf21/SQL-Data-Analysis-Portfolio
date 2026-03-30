@@ -10,7 +10,7 @@ More info can be found in the following [Kaggle link](https://www.kaggle.com/dat
 
 ## Column Reference
 | Category | Columns|
-| :-------------: |:-------------:|
+| :-------------|:-------------|
 | **Demographic & Geographic**      | ```age```, ```sex```, ```region```   |
 | **Health & Lifestyle**      | ```bmi```, ```smoker```  |
 | **Family** | ```children```   |
@@ -18,23 +18,26 @@ More info can be found in the following [Kaggle link](https://www.kaggle.com/dat
 
 </br>
 
-## 1. Foundational Exploration
-In the first 2 sections, you can see a focus on understanding the distribution and cost outliers.
-- **Segmenting by Lifestyle**: Simple ```GROUP BY``` and ```AVG``` functions were used to compare charges between smokers and non-smokers.
-- **Filtering by Health Metrics**: Used subqueries to isolate 'above averge' BMI policyholders.
+## Key Findings
+### Executive Summary
+This high-level query was designed for dashboards to provide a brief overview on policyholder demographics and cost drivers.
 
-</br>
+| Total Policyholders | Average Charges ($) | Number of Smokers | Average Smoker Charges ($) | Region with Highest Average Charges | 
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 1338 | 13,270.42 | 274 | 32,050.23 | southeast | 
 
-## 2. Intermediate Bucketing
-To make the data more readable, I used ```CASE``` statements to transform variables into meaningful categories.
-- **Age & BMI Bracketing**: Instead of looking at individual ages and BMI figures, I created age groups and BMI categories. You can then filter or aggregate
-on this newly created column.
+#### Analysis Highlights
+- **The 'Smoking Premium' Gap**: Smoking is the most significant driver of medical costs. On average, smoking incur 3.8x higher charges ($32,050) compared to non-smokers ($8,434). Or a cost increase of $23,615 per year per smoking policyholder.
+- **Regional Concentration**: The Southeast region represents the highest financial risk, not only having the highest average charges ($14,735.41) but also containing the single most expensive policyholder in the entire dataset ($63,770.43). 
 
-</br>
+---
 
-## 3. Advanced Analytical Logic
-The final section contains a few advanced queries that are separate from the advanced analysis file in this directory. These provide deeper 
-context and summarized insights.
-- **Window Functions**: Used ```OVER()``` to calculate how much a policyholders charges deviate from their regions average.
-- **Executive Summary**: This query provides a snapshot of the entire dataset by totaling the number of smokers, displaying average charges, total
-policyholders, and the region with the highest average charges.
+### Risk Concentration
+This query isolates the financial weight of the most vulnerable demographic segments.
+| Total Charges ($) | Charges from High Risk Policyholders ($) | High Risk Contribution (%) | High Risk Policyholders Count | High Risk Population (%) | 
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 17,755,824.99 | 2,786,767.53 | 15.69 | 64 | 4.78 | 
+
+#### Analysis Highlights
+- **Disproportionate Impact**: A small cohort of 'High-Risk' policyholders (Smokers, Age 45+, BMI 28+) represents less than 5% of the population but accounts for nearly 16% of all medical expenses.
+- **Cost Multiplier**: The average charge for a policyholder in this high-risk segment is approximately $43,543, which is 3.3x higher than the average policyholder ($13,270).

@@ -1,31 +1,96 @@
+/* 
+  What needs to be cleaned:
+  The following 5 queries will show us there are inconsistencies in the data
+  or are sanity tests to prove what we do later on is correct.
+*/
+
+-- 1. There are cases where the "Manner of Death" is NULL, Pending, or mispelled.
+SELECT 
+  "Manner of Death",
+  COUNT(*)
+FROM drug
+GROUP BY "Manner of Death"
+
+-- 2. If you want to analyze Race demographics, then there are several chores to complete. There are 24 races. 
+SELECT 
+  Race,
+  COUNT(*)
+FROM drug
+GROUP BY Race
+
+-- 3. For location based analysis, there are many nulls. 
+-- Additionally, there are cases where the Residence County is CT based but their residence state is not CT.
+SELECT 
+  EXTRACT(YEAR FROM Date) AS Year,
+  "Residence County",
+  "Residence State"
+FROM drug
+WHERE "Residence State" IS NULL 
+  AND "Residence County" IS NOT NULL
+
+-- 4. For coordinate extraction, there is incosistencies in format for each 'Geo' column
+-- For example, DeathCityGeo has 2 different formats throughout the dataset
+SELECT 
+  ResidenceCityGeo,
+  InjuryCityGeo,
+  DeathCityGeo,
+FROM drug
+ORDER BY RANDOM()
+
+-- 4a. We must determine a method for how to extract just the X and Y coordinates
+SELECT
+  DeathCityGeo,
+
+  -- LEFT will give us values from left to right
+  LEFT(DeathCityGeo, 10),
+
+  -- RIGHT will give us values from right to left
+  RIGHT(DeathCityGeo, 10),
+
+  -- This gives us the position of a specific character
+  STRPOS(DeathCityGeo, '('),
+
+  -- SUBSTR will retirn a substring of text, we just have to provide where to start and optionally where to end
+  SUBSTR(DeathCityGeo, 0, 10)
+
+FROM drug
+
+-- 5. Coordinates sanity testing
+SELECT
+  -- Total length of DeathCityGeo Coordinates
+  LENGTH(SUBSTR(DeathCityGeo, STRPOS(DeathCityGeo, '(') + 1)) - 1 AS CoordinatesLength,
+    
+  -- STRPOS to determine how far in the '(' character is from LEFT to RIGHT
+  STRPOS(DeathCityGeo, '(') + 1 AS ParStart
+FROM drug
+
+
 /* Beginner SQL Challenges (Foundations & Aggregations) */
 
+  
 -- Monthly seasonality
 -- Extract which months have the highest death counts
 SELECT 
-  EXTRACT(month FROM Date) AS Month,
+  EXTRACT(MONTH FROM Date) AS Month,
   COUNT(*) AS Deaths
 FROM drug
+
+WHERE "Manner of Death" != 'Pending'
+
 GROUP BY Month
 ORDER BY Deaths DESC
-
+  
 -- Yearly deaths count
 -- Extract the year from Date and show the total number of deaths per year
 SELECT 
-  EXTRACT(year FROM Date) AS Year,
+  EXTRACT(YEAR FROM Date) AS Year,
   COUNT(*) AS Deaths
 FROM drug
-GROUP BY Year
-ORDER BY Year DESC
 
--- Deaths by Race
--- Pull the number of deaths per race
-SELECT 
-  Race,
-  COUNT(*) AS Deaths
-FROM drug
-GROUP BY Race
-ORDER BY Deaths DESC
+WHERE "Manner of Death" != 'Pending'
+
+GROUP BY Year
+ORDER BY Year ASC
 
 -- Age distribution
 -- Bucket ages into: 
@@ -37,10 +102,17 @@ SELECT
     WHEN Age BETWEEN 25 AND 34 THEN '25-34'
     WHEN Age BETWEEN 35 AND 44 THEN '35-44'
     WHEN Age BETWEEN 45 AND 54 THEN '45-54'
-    WHEN Age > 65 THEN '65+'
-    END AS AgeGroup,
+    WHEN Age BETWEEN 55 AND 64 THEN '55-64'
+    WHEN Age >= 65 THEN '65+'
+    ELSE 'Not Specified'
+  END AS AgeGroup,
   COUNT(*) AS Deaths
 FROM drug
+
+-- There are 2 cases in the dataset where the Age is NULL so we are going to exclude them and also the Pending cases
+WHERE Age IS NOT NULL
+  AND "Cause of Death" != 'Pending'
+  
 GROUP BY AgeGroup
 ORDER BY Deaths DESC
 
@@ -54,9 +126,11 @@ WHERE "Injury City" NOT null
 GROUP BY "Injury City"
 ORDER BY Deaths DESC
 LIMIT 10
+  
 
 /* Intermediate SQL Challenges (Logic, Case Statements, Multi-Column Analysis) */
 
+  
 -- Fentanyl Trend
 -- For each year calculate:
 -- Total deaths
@@ -64,10 +138,14 @@ LIMIT 10
 -- Percentage of deaths where fentanyl is present
 SELECT 
   EXTRACT(year FROM Date) AS Year,
-  COUNT(*) AS TotalDeaths,
-  COUNT(*) FILTER (WHERE Fentanyl = 'Y') AS DeathsInvolvingFentanyl,
+  COUNT(*) AS "Total Deaths",
+  
+  COUNT(*) FILTER (WHERE Fentanyl = 'Y' OR 'y') AS "Deaths Where Fenanyl is Present",
+  
   ROUND(
-    (DeathsInvolvingFentanyl / TotalDeaths) * 100, 2) AS PctDeathsFentanyl
+    (COUNT(*) FILTER (WHERE Fentanyl = 'Y' OR 'y') / COUNT(*)) * 100
+  , 2) AS "Fentanyl Presence %"
+  
 FROM drug
 GROUP BY Year
 ORDER BY Year ASC
@@ -75,11 +153,14 @@ ORDER BY Year ASC
 -- Deaths by Year and Sex
 -- Pull yearly death counts split by Sex, exclude nulls
 SELECT 
-  EXTRACT(year FROM Date) AS Year,
+  EXTRACT(YEAR FROM Date) AS Year,
   Sex,
   COUNT(*) AS Deaths
 FROM drug
+
+WHERE "Manner of Death" != 'Pending'
 GROUP BY Year, Sex
+
 HAVING Sex = 'Male' OR Sex = 'Female'
 ORDER BY Year ASC, Sex ASC
 
@@ -88,79 +169,34 @@ ORDER BY Year ASC, Sex ASC
 -- % fentanyl detected
 -- Average age
 SELECT
-  EXTRACT(year FROM Date) AS Year,
+  EXTRACT(YEAR FROM Date) AS Year,
   COUNT(*) TotalDeaths,
-  ROUND(
-    (COUNT(*) FILTER (WHERE Fentanyl = 'Y') / COUNT(*))  * 100, 2) AS FentanylDeathsPct,
-  ROUND(AVG(Age), 1) AS Age,
-FROM drug
-GROUP BY Year
-ORDER BY Year ASC
-
-/* Advanced SQL Challenges (Analytics, Risk Profiling, Trend Analysis) */
-
--- Rolling 3-year death average
--- Compute a rolling average of total deaths by year
-SELECT 
-  EXTRACT(year FROM Date) AS Year,
-  COUNT(*) AS Deaths,
-  ROUND(AVG(Deaths) 
-    OVER(ORDER BY Year ROWS BETWEEN 3 PRECEDING AND CURRENT ROW), 2) AS Rolling3YearAverage
-FROM drug
-GROUP BY Year
-
--- Emerging drug detection
--- Determine the first year where:
--- Xylazine was present in 5% of total deaths
--- Answer: After 2019, every year has > 5%
-SELECT 
-  EXTRACT(year FROM Date) AS Year,
-  COUNT(*) AS Deaths,
-  COUNT(*) FILTER (WHERE Xylazine = 'Y') AS XylazineCount,   
-  ROUND(
-    (COUNT(*) FILTER (WHERE Xylazine = 'Y') / COUNT(*)) * 100, 2) AS PctXylazine
-FROM drug
-GROUP BY Year
-ORDER BY Year ASC
-
--- Compare dominant substances prevalent in toxicology report for:
--- Under 35
--- 35 - 54
--- 55+ 
--- Below is for all data regardless of year
-SELECT
   
--- Break ages into groups
-  CASE 
-    WHEN Age < 35 THEN 'Under 35'
-    WHEN Age BETWEEN 35 AND 54 THEN '35-54'
-    WHEN Age >= 55 THEN '55+'
-    ELSE 'Unknown'
-  END AS AgeGroup,
-
-  -- Calculate counts for popular drugs for all years
-  SUM(CASE WHEN Heroin = 'Y' THEN 1 ELSE 0 END) AS HeroinCount,
-  SUM(CASE WHEN Cocaine = 'Y' THEN 1 ELSE 0 END) AS CocaineCount,
-  SUM(CASE WHEN Fentanyl = 'Y' THEN 1 ELSE 0 END) AS FentanylCount,
-  SUM(CASE WHEN Ethanol = 'Y' THEN 1 ELSE 0 END) AS EthanolCount,
-  SUM(CASE WHEN Benzodiazepine = 'Y' THEN 1 ELSE 0 END) AS BenzoCount,
-  SUM(CASE WHEN "Heroin/Morph/Codeine" = 'Y' THEN 1 ELSE 0 END) AS "Heroin/Morph/Codeine",
-
-  -- Total the above counts
-  HeroinCount + CocaineCount + FentanylCount + EthanolCount + BenzoCount AS Total 
-FROM drug
-WHERE Age IS NOT NULL
-GROUP BY AgeGroup
-
--- Calculate YoY percentage change in deaths by year
-SELECT
-  EXTRACT(year FROM Date) AS Year,
-  COUNT(*) AS Deaths,
-  -- Identify difference between previous year deaths using the LAG() window function
-  Deaths - LAG(Deaths) OVER(ORDER BY Year) AS DeathsDiff,
-  -- Use above figure to divide by last years total death count and obtain YoY growth 
   ROUND(
-    (DeathsDiff / LAG(Deaths) OVER(ORDER BY Year)) * 100, 2) AS YoYDifferencePct
+    (COUNT(*) FILTER (WHERE Fentanyl = 'Y' OR 'y') / COUNT(*))  * 100
+  , 2) AS FentanylDeathsPct,
+  
+  ROUND(AVG(Age), 0) AS Age
 FROM drug
+
+WHERE "Manner of Death" != 'Pending'
+  
 GROUP BY Year
 ORDER BY Year ASC
+
+-- Missing State Logic: Fill in missing values in the Residence State column. 
+-- If the Residence City is in Connecticut but the State is null, programmatically assign it as CT.
+SELECT 
+  Age, 
+  Date, 
+  "Cause of Death",
+
+  -- Assign 'CT' to state if the county is in Connecticut
+  CASE
+    WHEN "Residence County" IN ('LITCHFIELD', 'FAIRFIELD', 'HARTFORD', 'MIDDLESEX', 'NEW HAVEN', 'NEW LONDON', 'TOLLAND', 'WINDHAM') 
+      THEN 'CT'
+    ELSE "Residence State"
+  END AS "Residence State",
+  
+  "Residence County"
+FROM drug 

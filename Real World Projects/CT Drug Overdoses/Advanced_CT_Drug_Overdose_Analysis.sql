@@ -265,3 +265,180 @@ FROM (
 GROUP BY Year
 ORDER BY Year ASC
 
+
+/*
+  Master summary query as seen in the .README section
+  Create a query that outputs PER YEAR:
+
+  Total deaths cleaned
+  YoY percentage difference using LAG() function
+  Average age cleaned
+  Average drug count per person per year
+  Top death cities
+  Top drug combinations
+
+  Conceptual structure:
+    CTE 1 -> Build a base that adds a unique case id to each row
+    CTE 2 -> Unpivot the data so each row is a drug
+    CTE 3 -> Take all unpivoted data and count drugs per case
+    CTE 4 -> Yearly average drug count per person
+    CTE 5 -> Create pairs of drugs for every year
+    CTE 6 -> Aggregate the previous CTE by year
+    CTE 7 -> Generate top death city aggregated by year
+    CTE 8 -> Gather current year and lasts total overdoses and average age
+*/
+
+-- Create base with synthetic ID
+WITH Base AS (
+  SELECT 
+    ROW_NUMBER() OVER() AS Case_ID,
+    *
+  FROM drug
+),
+
+-- Unpivot into long format
+Unpivoted AS (
+  SELECT 
+    case_id,
+    drug_name,
+    drug_flag,
+    EXTRACT(YEAR FROM Date) AS Year
+  FROM Base
+  UNPIVOT (
+    drug_flag
+    FOR drug_name IN (
+      Heroin,
+      Cocaine,
+      Fentanyl,
+      "Fentanyl Analogue",
+      Oxycodone,
+      Oxymorphone,
+      Hydrocodone,
+      Ethanol,
+      Hydrocodone,
+      Benzodiazepine,
+      Methadone,
+      "Meth/Amphetamine",
+      Amphet,
+      Tramad,
+      Hydromorphone,
+      "Morphine (Not Heroin)"
+      Xylazine,
+      Gabapentin,
+      "Opiate NOS",
+      "Heroin/Morph/Codeine",
+      "Other Opioid"
+      -- Remobing "Any Opioid" to avoid ambiguity
+    )
+  )
+  WHERE drug_flag IN ('Y', 'y', 'Y POPS', 'Y (PTCH)')
+),
+
+-- Individual case information
+CaseDrugCounts AS (
+  SELECT
+    case_id,
+    Year,
+    COUNT(*) AS DrugCount,
+  FROM Unpivoted
+  GROUP BY case_id, Year
+  ORDER BY case_id ASC
+),
+
+YearlyDrugAverages AS (
+  SELECT 
+    Year,
+    AVG(DrugCount) AS "Average Drugs Per Person"
+  FROM CaseDrugCounts
+  GROUP BY Year
+),
+
+-- Create pairs
+Pairs AS (
+  SELECT
+    a.Case_ID,
+    a.Year,
+    a.drug_name AS drug_a,
+    b.drug_name AS drug_b
+  FROM Unpivoted AS a
+  JOIN Unpivoted AS b
+    ON a.Case_ID = b.Case_ID
+    AND a.drug_name < b.drug_name
+    AND a.Year = b.Year
+),
+
+-- Aggreagte into yearly counts
+YearlyDrugCounts AS (
+  SELECT 
+    Year,
+    drug_a,
+    drug_b,
+    COUNT(*) AS Pair_Count,
+    RANK() OVER(PARTITION BY Year ORDER BY COUNT(*) DESC) AS "Drug Rank"
+  FROM Pairs
+  GROUP BY Year, drug_a, drug_b
+),
+
+-- Aggregate top Death Cities by year and basic cleaning
+YearlyCityCounts AS (
+  SELECT
+    EXTRACT(YEAR FROM Date) AS Year,
+    "Death City",
+    COUNT(*) AS "Death Count",
+    ROW_NUMBER() OVER(PARTITION BY EXTRACT(YEAR FROM Date) ORDER BY COUNT(*) DESC) AS "City Rank"
+  FROM drug 
+  WHERE "Death City" IS NOT NULL 
+    AND LOWER("Manner of Death") LIKE '%accid%'
+  GROUP BY Year, "Death City"
+),
+
+-- CTE to capture yearly stats
+YearlyStats AS (
+  SELECT 
+
+    -- Take just the year from date
+    EXTRACT(YEAR FROM Date) AS Year,
+
+    -- Cleaned count of all accidental overdoses
+    COUNT(*) FILTER (WHERE LOWER("Manner of Death") LIKE '%accid%') AS "Total Overdoses",
+
+    -- Last years death count for subtraction later
+    LAG(COUNT(*) FILTER (
+      WHERE LOWER("Manner of Death") LIKE '%accid%')) 
+      OVER(ORDER BY EXTRACT(YEAR FROM Date) ASC) AS "Last Years Overdoses",
+
+    -- Average age for all accidents where age is not NULL
+    AVG(Age) FILTER (WHERE LOWER("Manner of Death") LIKE '%accid%' AND Age IS NOT NULL) AS "Average Age",
+
+  FROM drug
+  GROUP BY EXTRACT(YEAR FROM Date)
+)
+
+-- Main outer query
+SELECT 
+  ys.Year,
+  ys."Total Overdoses",
+
+  -- Obtain YoY percentage difference in overdoses
+  ROUND(
+    ((ys."Total Overdoses" - ys."Last Years Overdoses") / ys."Total Overdoses") * 100 
+  , 2) AS "YoY Difference %",
+
+  -- Rounding just by 1 here to show slight differences in average
+  ROUND(ys."Average Age", 1) AS "Average Age",
+
+  ROUND(yda."Average Drugs Per Person", 2) AS "Average Drug Count Per Person",
+
+  -- Display top 2 death cities by combining strings
+  c1."Death City" || ' & ' || c2."Death City" AS "Top Death Cities",
+
+  yc.drug_a || ' & ' || yc.drug_b AS "Top Drug Combination"
+
+FROM YearlyStats ys
+
+LEFT JOIN YearlyDrugAverages yda ON ys.Year = yda.Year
+LEFT JOIN YearlyCityCounts c1 ON ys.Year = c1.Year AND c1."City Rank" = 1
+LEFT JOIN YearlyCityCounts c2 ON ys.Year = c2.Year AND c2."City Rank" = 2
+LEFT JOIN YearlyDrugCounts yc ON ys.Year = yc.Year AND yc."Drug Rank" = 1
+
+ORDER BY ys.Year ASC
